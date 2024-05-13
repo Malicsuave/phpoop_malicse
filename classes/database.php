@@ -63,6 +63,50 @@ function insertAddress($User_Id, $street, $barangay, $city, $province){
  
 
 }
+    function view(){
+        $con = $this->opencon();
+        return $con->query("SELECT
+        users.User_Id,
+        users.firstname,
+        users.lastname,
+        users.birthday,
+        users.sex,
+        users.username,
+        users.password,
+        CONCAT(
+            user_address.street,' ',user_address.barangay,' ',user_address.city,' ',user_address.province
+        ) AS address
+    FROM
+        users
+    JOIN user_address ON users.User_Id = user_address.User_Id")->fetchAll();
 
+    }
 
+    
+    function delete($id){
+        try{
+            $con = $this->opencon();
+            $con->beginTransaction();
+
+            // Delete user address
+
+            $query = $con->prepare("DELETE FROM user_address
+            WHERE User_Id =?");
+            $query->execute([$id]);
+        
+            // Delete user
+
+          
+            $query2 = $con->prepare("DELETE FROM users
+            WHERE User_Id =?");
+            $query2->execute([$id]);
+
+            $con->commit();
+            return true; //Deletion successful
+} catch (PDOException $e) {
+    $con->rollBack();
+    return false;
+} 
+
+}
 }
