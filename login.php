@@ -18,7 +18,7 @@ if (isset($_POST['login'])) {
               $error_message= "Incorrct username or password. Please try again";
             }
             } else {
-                $error_message="Error occured while loggin in. Please try again.";
+              $error_message="Error occured while loggin in. Please try again.";
             }
         }
     ?>

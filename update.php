@@ -1,11 +1,20 @@
-<!-- To be added in the multisave.php -->
-
 <?php
-
 require_once('classes/database.php');
-
 $con = new database();
-if (isset($_POST['multisave'])) {
+
+if (empty($_POST['id'])) {
+    header('location:index.php');
+
+}else {
+    $id = $_POST['id'];
+    $data =$con->viewdata($id);
+}
+
+
+
+if (isset($_POST['update'])) {
+    //User Information
+
     $username = $_POST['username'];
     $password = $_POST['password'];
     $confirm = $_POST['c_pass'];
@@ -13,36 +22,32 @@ if (isset($_POST['multisave'])) {
     $lastname = $_POST['lastname'];
     $birthday = $_POST['birthday'];
     $sex = $_POST['sex'];
+
+// Address Information
+
     $street = $_POST['street'];
     $barangay = $_POST['barangay'];
     $city = $_POST['city'];
     $province = $_POST['province'];
-    
+    $User_Id = $_POST['id'];
 
-
-    if ($password == $confirm) {
-        // Passwords match, proceed with signup
-        $user_id = $con->signupUser($username, $password, $firstname, $lastname, $birthday, $sex); // Insert into users table and get user_id
-        if ($user_id) {
-            // Signup successful, insert address into users_address table
-            if ($con->insertAddress($user_id, $street, $barangay, $city, $province)) {
-                // Address insertion successful, redirect to login page
-                header('location:login.php');
+    if($password==$confirm) {
+        if ($con->updateUser($User_Id, $username,$password,$firstname, $lastname, $birthday, $sex)) {
+        if ($con->updateUserAddress($User_Id,$street, $barangay, $city,$province )) {
+                header('location:index.php');
                 exit();
-            } else {
-                // Address insertion failed, display error message
-                $error = "Error occurred while signing up. Please try again.";
-            }
-        } else {
-            // User insertion failed, display error message
-            $error = "Error occurred while signing up. Please try again.";
-        }
-    } else {
-        // Passwords don't match, display error message
-        $error = "Passwords did not match. Please try again.";
+    }else{
+        $error ="Error occured while updating user address. Please try again.";
     }
-}
+    }else{
+        $error = "Error occured while updating user information. Please try again.";
+            }
+        }
+    }   
+
 ?>
+
+
 
 
 
@@ -52,7 +57,7 @@ if (isset($_POST['multisave'])) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MultiSave Page</title>
+  <title>Update Page</title>
   <link rel="stylesheet" href="./bootstrap-5.3.3-dist/css/bootstrap.css">
   <!-- Bootstrap CSS -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
@@ -71,7 +76,7 @@ if (isset($_POST['multisave'])) {
 <body>
 
 <div class="container custom-container rounded-3 shadow my-5 p-3 px-5">
-  <h3 class="text-center mt-4"> Update Form</h3>
+  <h3 class="text-center mt-4"> Registration Form</h3>
   <form method="post">
     <!-- Personal Information -->
     <div class="card mt-4">
@@ -80,21 +85,21 @@ if (isset($_POST['multisave'])) {
         <div class="form-row">
           <div class="form-group col-md-6 col-sm-12">
             <label for="firstName">First Name:</label>
-            <input type="text" class="form-control" id="firstName" name="firstname" placeholder="Enter first name">
+            <input type="text" class="form-control" id="firstName" name="firstname" placeholder="Enter first name" value="<?php echo $data ['firstname'] ?>">
           </div>
           <div class="form-group col-md-6 col-sm-12">
             <label for="lastName">Last Name:</label>
-            <input type="text" class="form-control" id="lastName" name="lastname" placeholder="Enter last name">
+            <input type="text" class="form-control" id="lastName" name="lastname" placeholder="Enter last name" value="<?php echo $data ['lastname'] ?>">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="birthday">Birthday:</label>
-            <input type="date" class="form-control" id="birthday" name="birthday">
+            <input type="date" class="form-control" id="birthday" name="birthday" value="<?php echo $data ['birthday'] ?>">
           </div>
           <div class="form-group col-md-6">
             <label for="sex">Sex:</label>
-            <select class="form-control" id="sex" name="sex">
+            <select class="form-control" id="sex" name="sex" value="<?php echo $data ['sex'] ?>">
               <option selected>Select Sex</option>
               <option>Male</option>
               <option>Female</option>
@@ -103,15 +108,15 @@ if (isset($_POST['multisave'])) {
         </div>
         <div class="form-group">
           <label for="username">Username:</label>
-          <input type="text" class="form-control" id="username" placeholder="Enter username" name="username">
+          <input type="text" class="form-control" id="username" placeholder="Enter username" name="username" value="<?php echo $data ['username'] ?>">
         </div>
         <div class="form-group">
           <label for="password">Password:</label>
-          <input type="password" class="form-control" id="password" placeholder="Enter password" name="password">
+          <input type="password" class="form-control" id="password" placeholder="Enter password" name="password" value="<?php echo $data ['password'] ?>">
         </div>
         <div class="form-group">
           <label for="password">Confirm Password:</label>
-          <input type="password" class="form-control" id="password" placeholder="Confirm password" name="c_pass">
+          <input type="password" class="form-control" id="password" placeholder="Confirm password" name="c_pass" value="<?php echo $data ['password'] ?>">
         </div>
       </div>
     </div>
@@ -122,21 +127,21 @@ if (isset($_POST['multisave'])) {
       <div class="card-body">
         <div class="form-group">
           <label for="street">Street:</label>
-          <input type="text" class="form-control" id="street" placeholder="Enter street" name="street">
+          <input type="text" class="form-control" id="street" placeholder="Enter street" name="street" value="<?php echo $data ['street'] ?>">
         </div>
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="barangay">Barangay:</label>
-            <input type="text" class="form-control" id="barangay" placeholder="Enter barangay" name="barangay">
+            <input type="text" class="form-control" id="barangay" placeholder="Enter barangay" name="barangay" value="<?php echo $data ['barangay'] ?>">
           </div>
           <div class="form-group col-md-6">
             <label for="city">City:</label>
-            <input type="text" class="form-control" id="city" placeholder="Enter city" name="city">
+            <input type="text" class="form-control" id="city" placeholder="Enter city" name="city" value="<?php echo $data ['city'] ?>">
           </div>
         </div>
         <div class="form-group">
           <label for="province">Province:</label>
-          <input type="text" class="form-control" id="province" placeholder="Enter province" name="province">
+          <input type="text" class="form-control" id="province" placeholder="Enter province" name="province" value="<?php echo $data ['province'] ?>">
         </div>
       </div>
     </div>
@@ -146,7 +151,10 @@ if (isset($_POST['multisave'])) {
     <div class="container">
     <div class="row justify-content-center gx-0">
         <div class="col-lg-3 col-md-4"> 
-            <input type="submit" name="multisave" class="btn btn-outline-primary btn-block mt-4" value="Sign Up">
+
+
+           <input type="hidden" name="id" value="<?php echo $data['User_Id']; ?>">
+           <input type="submit" name="update" class="btn btn-outline-primary btn-block mt-4" value="Sign Up">
         </div>
         <div class="col-lg-3 col-md-4"> 
             <a class="btn btn-outline-danger btn-block mt-4" href="login.php">Go Back</a>
