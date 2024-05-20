@@ -146,6 +146,7 @@ function viewdata($id){
         
             // Update Successful
             $con->commit();
+            return true;
         }catch (PDOException $e) {
             // Handle the exception (e.g., log error, return false, etc.)
             $con->rollBack();
@@ -163,6 +164,7 @@ function viewdata($id){
         
             // Update Successful
             $con->commit();
+            return true;
         }catch (PDOException $e) {
             // Handle the exception (e.g., log error, return false, etc.)
             $con->rollBack();
@@ -170,4 +172,8 @@ function viewdata($id){
 
         }
     }
+
+
+
+
 }
