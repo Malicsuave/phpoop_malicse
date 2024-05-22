@@ -9,7 +9,7 @@ if (isset($_SESSION['username'])) {
  
 
 if (isset($_POST['login'])) {
-  $username = $_POST['usernamoe'];
+  $username = $_POST['username'];
   $password = $_POST['password'];
   $result = $con->check($username, $password);
 
