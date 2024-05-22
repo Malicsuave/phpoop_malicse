@@ -11,7 +11,7 @@ if (empty($_SESSION['username'])) {
 
 
 
-if (isset( $_POST['Delete'])) {
+if (isset( $_POST['delete'])) {
     $id = $_POST['id'];
     if ($con->delete($id)) {
         header('location:index.php');
@@ -131,7 +131,7 @@ if (isset( $_POST['Delete'])) {
                     </form>
                     <form method="POST" class="d-inline">
                         <input type="hidden" name="id" value="<?php echo htmlspecialchars($rows['User_Id']); ?>">
-                        <input type="submit" name="delete" class="btn btn-danger btn-sm" value="Delete" onclick="return confirm('Are you sure you want to delete this user?')">
+                        <input type="submit" name="delete" class="btn btn-danger btn-sm" value="delete" onclick="return confirm('Are you sure you want to delete this user?')">
                     </form>
                 </div>
             </div>
