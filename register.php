@@ -12,7 +12,7 @@ if (isset($_POST['multisave'])) {
     // Getting the account information
     $username = $_POST['username'];
     $email = $_POST['email'];
-    
+
     $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
     
     // Getting the personal information
@@ -144,9 +144,10 @@ if (isset($_POST['multisave'])) {
         </div>
           <div class="form-group">
             <label for="email">Email:</label>
-            <input type="email" class="form-control" name="email" placeholder="Enter email" required>
+            <input type="email" class="form-control" name="email" id="email" placeholder="Enter email" required>
             <div class="valid-feedback">Looks good!</div>
             <div class="invalid-feedback">Please enter a valid email.</div>
+            <div id="emailFeedback" class="invalid-feedback"></div>
           </div>
           <div class="form-group">
             <label for="password">Password:</label>
@@ -272,6 +273,7 @@ if (isset($_POST['multisave'])) {
 <!-- Script for Address Selector -->
 <script src="ph-address-selector.js"></script>
 <script>
+  // Ajax for existing username 
 $(document).ready(function(){
     $('#username').on('input', function(){
         var username = $(this).val();
@@ -296,6 +298,41 @@ $(document).ready(function(){
         } else {
             $('#username').removeClass('is-valid is-invalid');
             $('#usernameFeedback').text('');
+            $('#nextButton').prop('disabled', false); // Enable the Next button if username is empty
+        }
+    });
+});
+
+</script>
+
+
+<!-- Another Ajax for Email Checking -->
+<script>
+  
+$(document).ready(function(){
+    $('#email').on('input', function(){
+        var email = $(this).val();
+        if(email.length > 0) {
+            $.ajax({
+                url: 'check_email.php',
+                method: 'POST',
+                data: {email: email},
+                dataType: 'json',
+                success: function(response) {
+                    if(response.exists) {
+                        $('#email').removeClass('is-valid').addClass('is-invalid'); 
+                        $('#emailFeedback').text('Email is already taken.');
+                        $('#nextButton').prop('disabled', true); // Disable the Next button
+                    } else {
+                        $('#email').removeClass('is-invalid').addClass('is-valid');
+                        $('#emailFeedback').text('');
+                        $('#nextButton').prop('disabled', false); // Enable the Next button
+                    }
+                }
+            });
+        } else {
+            $('#email').removeClass('is-valid is-invalid');
+            $('#emailFeedback').text('');
             $('#nextButton').prop('disabled', false); // Enable the Next button if username is empty
         }
     });
