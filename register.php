@@ -12,6 +12,7 @@ if (isset($_POST['multisave'])) {
     // Getting the account information
     $username = $_POST['username'];
     $email = $_POST['email'];
+    
     $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
     
     // Getting the personal information

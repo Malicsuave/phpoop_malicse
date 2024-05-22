@@ -34,36 +34,53 @@ VALUES (?, ?, ?, ?, ?, ?)")
            
 }
 
-function signupUser($username, $password, $firstname, $lastname, $birthday, $sex){
-    $con = $this->opencon();
+// function signupUser($username, $password, $firstname, $lastname, $birthday, $sex){
+//     $con = $this->opencon();
 
 
-    // Check if the username is already exists
+//     // Check if the username is already exists
 
-    $query=$con->prepare("SELECT username FROM users WHERE username =?");
-    $query->execute([$username]);
-    $existingUser= $query->fetch();
+//     $query=$con->prepare("SELECT username FROM users WHERE username =?");
+//     $query->execute([$username]);
+//     $existingUser= $query->fetch();
     
 
-// If the username already exists, return false
-    if($existingUser){
-    return false;
-}
-// Insert the new username and password into the database
- $con->prepare("INSERT INTO users(username,password,firstname,lastname,birthday,sex)
-VALUES (?, ?, ?, ?, ?, ?)")
-           ->execute([$username,$password, $firstname, $lastname, $birthday, $sex]);
-           return $con->lastInsertId();
-}
+// // If the username already exists, return false
+//     if($existingUser){
+//     return false;
+// }
+// // Insert the new username and password into the database
+//  $con->prepare("INSERT INTO users(username,password,firstname,lastname,birthday,sex)
+// VALUES (?, ?, ?, ?, ?, ?)")
+//            ->execute([$username,$password, $firstname, $lastname, $birthday, $sex]);
+//            return $con->lastInsertId();
+// }
 
-function insertAddress($User_Id, $street, $barangay, $city, $province){
+
+function signupUser($firstname, $lastname, $birthday, $sex, $email, $username, $password, $profilePicture)
+{
     $con = $this->opencon();
-     return $con->prepare("INSERT INTO user_address (User_Id,street, barangay, city,province) VALUES(?, ?, ?, ?, ?)") ->execute([$User_Id, $street, $barangay, $city, $province]);
+    // Save user data along with profile picture path to the database
+    $con->prepare("INSERT INTO users (firstname, lastname, birthday, sex, user_email, username, password, user_profile_picture) VALUES (?,?,?,?,?,?,?,?)")->execute([$firstname, $lastname, $birthday, $sex, $email, $username, $password, $profilePicture]);
+    return $con->lastInsertId();
+    }
+// function insertAddress($User_Id, $street, $barangay, $city, $province){
+//     $con = $this->opencon();
+//      return $con->prepare("INSERT INTO user_address (User_Id,street, barangay, city,province) VALUES(?, ?, ?, ?, ?)") ->execute([$User_Id, $street, $barangay, $city, $province]);
     
  
 
+// }
+
+
+function insertAddress($User_Id, $street, $barangay, $city, $province)
+{
+    $con = $this->opencon();
+    return $con->prepare("INSERT INTO user_address (User_Id, street, barangay, city, province) VALUES (?,?,?,?,?)")->execute([$User_Id, $street, $barangay,  $city, $province]);
+      
 }
-    function view(){
+
+function view(){
         $con = $this->opencon();
         return $con->query("SELECT
         users.User_Id,
@@ -73,6 +90,7 @@ function insertAddress($User_Id, $street, $barangay, $city, $province){
         users.sex,
         users.username, 
         users.password,
+        users.user_profile_picture, 
         CONCAT(
             user_address.street,' ',user_address.barangay,' ',user_address.city,' ',user_address.province
         ) AS address
@@ -174,6 +192,6 @@ function viewdata($id){
     }
 
 
-
+   
 
 }

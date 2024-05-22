@@ -47,6 +47,7 @@ if (isset( $_POST['Delete'])) {
       <thead>
         <tr>
           <th>#</th>
+          <th>Picture</th>
           <th>First Name</th>
           <th>Last Name</th>
           <th>Birthday</th>
@@ -65,12 +66,20 @@ if (isset( $_POST['Delete'])) {
     ?>
         <tr>
           <td><?php echo $counter++?></td>
+          <td>
+        <?php if (!empty($rows['user_profile_picture'])): ?>
+          <img src="<?php echo htmlspecialchars($rows['user_profile_picture']); ?>" alt="Profile Picture" style="width: 50px; height: 50px; border-radius: 50%;">
+        <?php else: ?>
+          <img src="path/to/default/profile/pic.jpg" alt="Default Profile Picture" style="width: 50px; height: 50px; border-radius: 50%;">
+        <?php endif; ?>
+      </td>
           <td> <?php echo $rows ['firstname']; ?> </td>
           <td> <?php echo $rows ['lastname']; ?></td>
           <td><?php echo $rows ['birthday']; ?></td>
           <td><?php echo $rows ['sex']; ?></td>
           <td><?php echo $rows ['username']; ?></td>
           <td><?php echo $rows ['address']; ?></td>
+          
           <td>
         <form action="update.php"method="POST" style="display: inline;">
             <input type="hidden" name="id" value="<?php echo $rows ['User_Id']; ?>">
