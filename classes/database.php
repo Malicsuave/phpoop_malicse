@@ -210,8 +210,29 @@ function viewdata($id){
 
         }
     }
+    
+        
+    function check_account_type($username) {
+        $query = $this->connection->prepare("SELECT account_type FROM users WHERE username = :username");
+        $query->bindParam(":username", $username);
+        $query->execute();
+
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+        if ($result) {
+            return $result['account_type'];
+        } else {
+            return false;
+        }
+    }
+        
+    
+}
+
+    
+
+
 
 
    
 
-}
+
