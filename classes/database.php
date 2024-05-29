@@ -246,6 +246,23 @@ function viewdata($id){
         // If no user is found or password is incorrect, return false
         return false;
     }
+function updatePassword($userId, $hashedPassword){
+        try {
+            $con = $this->opencon();
+            $con->beginTransaction();
+            $query = $con->prepare("UPDATE users SET password = ? WHERE User_Id = ?");
+            $query->execute([$hashedPassword, $userId]);
+            // Update successful
+            $con->commit();
+            return true;
+        } catch (PDOException $e) {
+            // Handle the exception (e.g., log error, return false, etc.)
+             $con->rollBack();
+            return false; // Update failed
+        }
+        }
+
+
 }
 
     
@@ -254,5 +271,3 @@ function viewdata($id){
 
 
    
-
-
