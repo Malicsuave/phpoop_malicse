@@ -5,6 +5,7 @@ $con = new database();
 
 session_start();
 
+echo $_SESSION['User_Id'];
 if (empty($_SESSION['username'])) {   
   header('location:login.php');
 }
@@ -14,7 +15,7 @@ if (empty($_SESSION['username'])) {
 if (isset( $_POST['delete'])) {
     $id = $_POST['id'];
     if ($con->delete($id)) {
-        header('location:index.php');
+        header('location:index.php?status=success');
     }else {
         echo "Something went wrong.";
     }
