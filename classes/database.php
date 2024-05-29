@@ -227,6 +227,25 @@ function viewdata($id){
     // }
         
     
+    function validateCurrentPassword($User_Id, $currentPassword) {
+        // Open database connection
+        $con = $this->opencon();
+    
+        // Prepare the SQL query
+        $query = $con->prepare("SELECT password FROM users WHERE User_Id = ?");
+        $query->execute([$User_Id]);
+    
+        // Fetch the user data as an associative array
+        $user = $query->fetch(PDO::FETCH_ASSOC);
+    
+        // If a user is found, verify the password
+        if ($user && password_verify($currentPassword, $user['password'])) {
+            return true;
+        }
+    
+        // If no user is found or password is incorrect, return false
+        return false;
+    }
 }
 
     

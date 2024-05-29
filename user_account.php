@@ -1,6 +1,54 @@
 <?php
 require_once('classes/database.php');
+$con = new database();
 session_start();
+
+$id = $_SESSION['User_Id'];
+$data = $con->viewdata($id);
+
+if (isset($_POST['updatepassword'])) {
+  $User_Id = $_SESSION['User_Id'];
+  $currentPassword = $_POST['current_password'];
+  $newPassword = $_POST['new_password'];
+  $confirmPassword = $_POST['confirm_password'];
+
+  $con = new database();
+
+  if ($con->validateCurrentPassword($User_Id, $currentPassword)) {
+      if ($currentPassword === $newPassword) {
+          // New password is the same as the current password
+          header('Location: user_account.php?status=samepassword');
+          exit();
+      }
+ 
+      if ($newPassword === $confirmPassword) {
+          $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+          // Update the password in the database using the new method
+          if ($con->updatePassword($userId, $hashedPassword)) {
+              // Password updated successfully
+              header('Location: user_account.php?status=success');
+              exit();
+          } else {
+              // Failed to update password
+              header('Location: user_account.php?status=error');
+              exit();
+          }
+      } else {
+          // Passwords do not match
+          header('Location: user_account.php?status=nomatch');
+          exit();
+      }
+  } else {
+      // Current password is incorrect
+      header('Location: user_account.php?status=wrongpassword');
+      exit();
+  }
+
+  // Fetching currently enrolled courses:
+
+  
+}
 
 ?>
 
@@ -61,13 +109,14 @@ session_start();
           <h3>Account Information</h3>
         </div>
         <div class="info-body">
-          <p><strong>First Name:</strong> Jei</p>
-          <p><strong>Last Name:</strong> Pastrana</p>
-          <p><strong>Birthday:</strong> July 27, 1999</p>
+          <p><strong>First Name:</strong> <?php echo $data ['firstname']; ?> </p>
+          <p><strong>Last Name:</strong> <?php echo $data ['lastname']; ?></p>
+          <p><strong>Birthday:</strong> <?php echo $data ['birthday']; ?></p>
+        </div>
         </div>
       </div>
     </div>
-    </div>
+    
     <div class="row">
     <div class="col-md-12">
       <div class="address-info">
@@ -75,10 +124,10 @@ session_start();
           <h3>Address Information</h3>
         </div>
         <div class="info-body">
-          <p><strong>Street:</strong> </p>
-          <p><strong>Barangay:</strong></p>
-          <p><strong>City:</strong></p>
-          <p><strong>Province:</strong></p>
+          <p><strong>Street:</strong> <?php echo $data ['street']; ?></p>
+          <p><strong>Barangay:</strong> <?php echo $data ['barangay']; ?></p>
+          <p><strong>City:</strong> <?php echo $data ['city']; ?></p>
+          <p><strong>Province:</strong><?php echo $data ['province']; ?></p>
           
         </div>
       </div>
@@ -153,38 +202,163 @@ session_start();
 </div>
 
 <!-- Change Password Modal -->
+<!-- Modal for Change Password -->
 <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form action="change_password.php" method="post">
-        <div class="modal-header">
-          <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+      <div class="modal-header">
+        <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="changePasswordForm" method="POST">
+          
+        <div class="form-group">
+          <label for="currentPassword">Current Password</label>
+          <input type="password" class="form-control" id="currentPassword" name="current_password" required>
+          <div id="currentPasswordFeedback" class="invalid-feedback"></div>
         </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="currentPassword">Current Password</label>
-            <input type="password" class="form-control" id="currentPassword" name="current_password" required>
-          </div>
-          <div class="form-group">
-            <label for="newPassword">New Password</label>
-            <input type="password" class="form-control" id="newPassword" name="new_password" required>
-          </div>
-          <div class="form-group">
-            <label for="confirmPassword">Confirm New Password</label>
-            <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
-          </div>
+        
+        <div class="form-group">
+          <label for="newPassword">New Password</label>
+          <input type="password" class="form-control" id="newPassword" name="new_password" required readonly>
+          <div id="newPasswordFeedback" class="invalid-feedback"></div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary">Save changes</button>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm New Password</label>
+          <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required readonly>
+          <div id="confirmPasswordFeedback" class="invalid-feedback"></div>
         </div>
-      </form>
+        
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary" name="updatepassword" id="saveChangesBtn" disabled>Save changes</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
+
+</div>
+
+<!-- Password Validation Logic Starts Here --><script>
+document.addEventListener('DOMContentLoaded', function() {
+    const currentPasswordInput = document.getElementById('currentPassword');
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const saveChangesBtn = document.getElementById('saveChangesBtn');
+    const currentPasswordFeedback = document.getElementById('currentPasswordFeedback');
+    const newPasswordFeedback = document.getElementById('newPasswordFeedback');
+    const confirmPasswordFeedback = document.getElementById('confirmPasswordFeedback');
+
+    currentPasswordInput.addEventListener('input', function() {
+        const currentPassword = currentPasswordInput.value;
+        if (currentPassword) {
+            fetch('check_password.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ 'current_password': currentPassword })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    currentPasswordInput.classList.add('is-valid');
+                    currentPasswordInput.classList.remove('is-invalid');
+                    currentPasswordFeedback.textContent = '';
+
+                    newPasswordInput.removeAttribute('readonly');
+                    confirmPasswordInput.removeAttribute('readonly');
+                } else {
+                    currentPasswordInput.classList.add('is-invalid');
+                    currentPasswordInput.classList.remove('is-valid');
+                    currentPasswordFeedback.textContent = 'Current password is incorrect.';
+
+                    newPasswordInput.setAttribute('readonly', 'readonly');
+                    confirmPasswordInput.setAttribute('readonly', 'readonly');
+                }
+                toggleSaveButton();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                currentPasswordInput.classList.add('is-invalid');
+                currentPasswordInput.classList.remove('is-valid');
+                currentPasswordFeedback.textContent = 'An error occurred while verifying the current password.';
+
+                newPasswordInput.setAttribute('readonly', 'readonly');
+                confirmPasswordInput.setAttribute('readonly', 'readonly');
+                toggleSaveButton();
+            });
+        } else {
+            currentPasswordInput.classList.remove('is-valid', 'is-invalid');
+            currentPasswordFeedback.textContent = '';
+            newPasswordInput.setAttribute('readonly', 'readonly');
+            confirmPasswordInput.setAttribute('readonly', 'readonly');
+            toggleSaveButton();
+        }
+    });
+
+    newPasswordInput.addEventListener('input', function() {
+        const newPassword = newPasswordInput.value;
+        const currentPassword = currentPasswordInput.value;
+
+        if (newPassword === currentPassword) {
+            newPasswordInput.classList.add('is-invalid');
+            newPasswordInput.classList.remove('is-valid');
+            newPasswordFeedback.textContent = 'New password cannot be the same as the current password.';
+        } else if (validatePassword(newPasswordInput)) {
+            newPasswordInput.classList.add('is-valid');
+            newPasswordInput.classList.remove('is-invalid');
+            newPasswordFeedback.textContent = '';
+        } else {
+            newPasswordInput.classList.add('is-invalid');
+            newPasswordInput.classList.remove('is-valid');
+            newPasswordFeedback.textContent = 'Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character.';
+        }
+        validateConfirmPassword(confirmPasswordInput);
+        toggleSaveButton();
+    });
+
+    confirmPasswordInput.addEventListener('input', function() {
+        validateConfirmPassword(confirmPasswordInput);
+        toggleSaveButton();
+    });
+
+    function validatePassword(passwordInput) {
+        const password = passwordInput.value;
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+        return regex.test(password);
+    }
+
+    function validateConfirmPassword(confirmPasswordInput) {
+        const password = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        if (password === confirmPassword && password !== '') {
+            confirmPasswordInput.classList.add('is-valid');
+            confirmPasswordInput.classList.remove('is-invalid');
+            confirmPasswordFeedback.textContent = '';
+            return true;
+        } else {
+            confirmPasswordInput.classList.add('is-invalid');
+            confirmPasswordInput.classList.remove('is-valid');
+            confirmPasswordFeedback.textContent = 'Passwords do not match.';
+            return false;
+        }
+    }
+
+    function toggleSaveButton() {
+        if (currentPasswordInput.classList.contains('is-valid') && validatePassword(newPasswordInput) && validateConfirmPassword(confirmPasswordInput)) {
+            saveChangesBtn.removeAttribute('disabled');
+        } else {
+            saveChangesBtn.setAttribute('disabled', 'disabled');
+        }
+    }
+});
+
+</script><!-- Password Validation Logic Ends Here -->
+
 <!-- Bootstrap JS and dependencies -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
