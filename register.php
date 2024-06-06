@@ -153,7 +153,7 @@ if (isset($_POST['multisave'])) {
             <label for="password">Password:</label>
             <input type="password" class="form-control" name="password" placeholder="Enter password" required>
             <div class="valid-feedback">Looks good!</div>
-            <div class="invalid-feedback">Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one special character.</div>
+            <div class="invalid-feedback`">Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one special character.</div>
           </div>
 
           <div class="form-group">

@@ -40,11 +40,7 @@ if (isset($_POST['updatepassword'])) {
                 header('Location: user_account.php?status=error');
                 exit();
             }
-        
     } 
-
-
-
 
 ?>
 
